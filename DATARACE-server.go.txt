@@ -1,0 +1,47 @@
+WARNING: DATA RACE
+Write at 0x00c0041b4540 by goroutine 1617:
+  bytes.(*Buffer).tryGrowByReslice()
+      /usr/local/go/src/bytes/buffer.go:117 +0xa5
+  bytes.(*Buffer).Write()
+      /usr/local/go/src/bytes/buffer.go:177 +0xb9
+  github.com/sirupsen/logrus.(*Entry).write()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:294 +0x261
+  github.com/sirupsen/logrus.(*Entry).log()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:252 +0xa4a
+  github.com/sirupsen/logrus.(*Entry).Log()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:304 +0x8b
+  github.com/sirupsen/logrus.(*Entry).Logf()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:349 +0xd8
+  github.com/sirupsen/logrus.(*Logger).Logf()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/logger.go:154 +0x9e
+  github.com/sirupsen/logrus.(*Logger).Errorf()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/logger.go:186 +0x2dd
+  github.com/sirupsen/logrus.Errorf()
+      /home/prow/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/exported.go:214 +0x2a4
+  sigs.k8s.io/external-dns/endpoint.NewEndpointWithTTL()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/endpoint/endpoint.go:241 +0x209
+  sigs.k8s.io/external-dns/source.endpointsForHostname()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/source.go:302 +0x584
+  sigs.k8s.io/external-dns/source.(*serviceSource).generateEndpoints()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/service.go:513 +0xbf3
+  sigs.k8s.io/external-dns/source.(*serviceSource).endpoints()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/service.go:410 +0x3bc
+  sigs.k8s.io/external-dns/source.(*serviceSource).Endpoints()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/service.go:171 +0x864
+  sigs.k8s.io/external-dns/source.TestClusterIpServices.func1()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/service_test.go:1660 +0x83b
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1792 +0x225
+  testing.(*T).Run.gowrap1()
+      /usr/local/go/src/testing/testing.go:1851 +0x44
+Previous read at 0x00c0041b4540 by goroutine 6411:
+  bytes.(*Buffer).String()
+      /usr/local/go/src/bytes/buffer.go:71 +0xa26
+  sigs.k8s.io/external-dns/source.testNodeSourceEndpoints.func1()
+      /home/prow/go/src/github.com/kubernetes-sigs/external-dns/source/node_test.go:450 +0x91e
+  testing.tRunner()
+19 skipped lines...
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1792 +0x225
+  testing.(*T).Run.gowrap1()
+      /usr/local/go/src/testing/testing.go:1851 +0x44
