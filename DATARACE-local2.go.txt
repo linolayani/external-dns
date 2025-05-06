@@ -1,0 +1,58 @@
+WARNING: DATA RACE
+Write at 0x00c005cff4a0 by goroutine 7359:
+  bytes.(*Buffer).grow()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/bytes/buffer.go:151 +0x25c
+  bytes.(*Buffer).Write()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/bytes/buffer.go:179 +0xb4
+  github.com/sirupsen/logrus.(*Entry).write()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:294 +0x1cc
+  github.com/sirupsen/logrus.(*Entry).log()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:252 +0x794
+  github.com/sirupsen/logrus.(*Entry).Log()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:304 +0x80
+  github.com/sirupsen/logrus.(*Entry).Logf()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/entry.go:349 +0xbc
+  github.com/sirupsen/logrus.(*Logger).Logf()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/logger.go:154 +0x7c
+  github.com/sirupsen/logrus.(*Logger).Debugf()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/logger.go:164 +0x800
+  github.com/sirupsen/logrus.Debugf()
+      /Users/lino/go/pkg/mod/github.com/sirupsen/logrus@v1.9.3/exported.go:189 +0x7d0
+  sigs.k8s.io/external-dns/source.(*ingressSource).Endpoints()
+      /Users/lino/Perso/external-dns/source/ingress.go:168 +0x6fc
+  sigs.k8s.io/external-dns/source.testIngressEndpoints.func1()
+      /Users/lino/Perso/external-dns/source/ingress_test.go:1456 +0x3d4
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1792 +0x180
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x40
+
+Previous read at 0x00c005cff4a0 by goroutine 8639:
+  bytes.(*Buffer).String()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/bytes/buffer.go:71 +0x670
+  sigs.k8s.io/external-dns/source.testNodeSourceEndpoints.func1()
+      /Users/lino/Perso/external-dns/source/node_test.go:446 +0x5a8
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1792 +0x180
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x40
+
+Goroutine 7359 (running) created at:
+  testing.(*T).Run()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x684
+  sigs.k8s.io/external-dns/source.testIngressEndpoints()
+      /Users/lino/Perso/external-dns/source/ingress_test.go:1428 +0xcafc
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1792 +0x180
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x40
+
+Goroutine 8639 (finished) created at:
+  testing.(*T).Run()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x684
+  sigs.k8s.io/external-dns/source.testNodeSourceEndpoints()
+      /Users/lino/Perso/external-dns/source/node_test.go:393 +0x4274
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1792 +0x180
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.24.2/libexec/src/testing/testing.go:1851 +0x40
