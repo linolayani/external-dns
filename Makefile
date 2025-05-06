@@ -69,7 +69,7 @@ crd: controller-gen-install
 	${CONTROLLER_GEN} crd:crdVersions=v1 paths="./endpoint/..." output:crd:stdout > config/crd/standard/dnsendpoint.yaml
 	cp -f config/crd/standard/dnsendpoint.yaml charts/external-dns/crds/dnsendpoint.yaml
 
-#? test: The verify target runs tasks similar to the CI tasks, but without code coverage
+#? test: The verify target runs tasks similar to the CI tasks, but without code coverage 
 .PHONY: test
 test:
 	GOFLAGS=-ldflags=-extldflags=-w go test -race -coverprofile=profile.cov ./...
