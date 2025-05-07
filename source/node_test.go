@@ -17,12 +17,11 @@ limitations under the License.
 package source
 
 import (
-	"bytes"
 	"context"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"sigs.k8s.io/external-dns/internal/testutils"
+	"github.com/sirupsen/logrus/hooks/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -391,7 +390,8 @@ func testNodeSourceEndpoints(t *testing.T) {
 		},
 	} {
 		t.Run(tc.title, func(t *testing.T) {
-			buf := testutils.LogsToBuffer(log.DebugLevel, t)
+			hook := test.NewGlobal()
+			log.SetLevel(log.DebugLevel)
 
 			labelSelector := labels.Everything()
 			if tc.labelSelector != "" {
@@ -442,12 +442,17 @@ func testNodeSourceEndpoints(t *testing.T) {
 			// Validate returned endpoints against desired endpoints.
 			validateEndpoints(t, endpoints, tc.expected)
 
+			var actualLogs []string
+			for _, entry := range hook.AllEntries() {
+				actualLogs = append(actualLogs, entry.Message)
+			}
+
 			for _, entry := range tc.expectedLogs {
-				assert.Contains(t, buf.String(), entry)
+				assert.Contains(t, actualLogs, entry)
 			}
 
 			for _, entry := range tc.expectedAbsentLogs {
-				assert.NotContains(t, buf.String(), entry)
+				assert.NotContains(t, actualLogs, entry)
 			}
 		})
 	}
@@ -533,10 +538,9 @@ func testNodeEndpointsWithIPv6(t *testing.T) {
 		_, err := kubernetes.CoreV1().Nodes().Create(context.Background(), node, metav1.CreateOptions{})
 		require.NoError(t, err)
 
-		var buf *bytes.Buffer
-		if tc.exposeInternalIPv6 {
-			buf = testutils.LogsToBuffer(log.WarnLevel, t)
-		}
+		hook := test.NewGlobal()
+		defer hook.Reset()
+		log.SetLevel(log.WarnLevel)
 
 		// Create our object under test and get the endpoints.
 		client, err := NewNodeSource(
@@ -556,8 +560,8 @@ func testNodeEndpointsWithIPv6(t *testing.T) {
 		} else {
 			require.NoError(t, err)
 
-			if tc.exposeInternalIPv6 && buf != nil {
-				assert.Contains(t, buf.String(), warningMsg)
+			if tc.exposeInternalIPv6 && hook != nil {
+				assert.Contains(t, hook.LastEntry().Message, warningMsg)
 			}
 		}
 

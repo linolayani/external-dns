@@ -23,11 +23,10 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	log "github.com/sirupsen/logrus"
-
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/internal/testutils"
 	"sigs.k8s.io/external-dns/plan"
@@ -1821,7 +1820,9 @@ func TestTXTRegistryRecordsWithEmptyTargets(t *testing.T) {
 	})
 
 	r, _ := NewTXTRegistry(p, "", "", "owner", time.Hour, "", []string{}, []string{}, false, nil, false)
-	b := testutils.LogsToBuffer(log.ErrorLevel, t)
+	hook := test.NewGlobal()
+	log.SetLevel(log.ErrorLevel)
+	defer hook.Reset()
 	records, err := r.Records(ctx)
 	require.NoError(t, err)
 
@@ -1835,5 +1836,5 @@ func TestTXTRegistryRecordsWithEmptyTargets(t *testing.T) {
 	}
 
 	assert.True(t, testutils.SameEndpoints(records, expectedRecords))
-	assert.Contains(t, b.String(), "TXT record has no targets empty-targets.test-zone.example.org")
+	assert.Contains(t, hook.LastEntry().Message, "TXT record has no targets empty-targets.test-zone.example.org")
 }

@@ -19,12 +19,13 @@ package aws
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
-	"sigs.k8s.io/external-dns/internal/testutils"
 )
 
 func TestAWSRecordsV1(t *testing.T) {
@@ -101,7 +102,32 @@ func TestAWSZonesSecondRequestHitsTheCache(t *testing.T) {
 	ctx := context.Background()
 	_, err := provider.Zones(ctx)
 	assert.NoError(t, err)
-	b := testutils.LogsToBuffer(log.DebugLevel, t)
+
+	// Create an isolated logger
+	isolatedLogger := &log.Logger{
+		Out:       io.Discard,
+		Formatter: new(log.TextFormatter),
+		Hooks:     make(log.LevelHooks),
+		Level:     log.DebugLevel,
+	}
+	hook := test.NewLocal(isolatedLogger)
+	defer hook.Reset()
+
+	// Save the original logger and restore it after the test
+	originalLogger := log.StandardLogger()
+	defer func() {
+		log.StandardLogger().ReplaceHooks(originalLogger.Hooks)
+		log.StandardLogger().SetOutput(originalLogger.Out)
+		log.StandardLogger().SetFormatter(originalLogger.Formatter)
+		log.StandardLogger().SetLevel(originalLogger.Level)
+	}()
+
+	// Replace the global logger with our isolated one
+	log.StandardLogger().ReplaceHooks(isolatedLogger.Hooks)
+	log.StandardLogger().SetOutput(isolatedLogger.Out)
+	log.StandardLogger().SetFormatter(isolatedLogger.Formatter)
+	log.StandardLogger().SetLevel(isolatedLogger.Level)
+
 	_, _ = provider.Zones(ctx)
-	assert.Contains(t, b.String(), "level=debug msg=\"Using cached zones list\"")
+	assert.Contains(t, hook.LastEntry().Message, "Using cached zones list")
 }
